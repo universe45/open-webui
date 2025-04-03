@@ -27,14 +27,14 @@
 
 	import PencilSquare from '../icons/PencilSquare.svelte';
 
-	const i18n = getContext('i18n');
+	const i18n = getContext('i18n'); // Ensure this is an object, not a store
 
 	export let initNewChat: Function;
-	export let title: string = $WEBUI_NAME;
+	export const title: string = $WEBUI_NAME;
 	export let shareEnabled: boolean = false;
 
 	export let chat;
-	export let selectedModels;
+	export let selectedModels: string[] | undefined;
 	export let showModelSelector = true;
 
 	let showShareChatModal = false;

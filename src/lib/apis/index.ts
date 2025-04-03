@@ -1,4 +1,4 @@
-import { WEBUI_API_BASE_URL, WEBUI_BASE_URL } from '$lib/constants';
+import { WEBUI_BASE_URL } from '$lib/constants';
 import { convertOpenApiToToolPayload } from '$lib/utils';
 import { getOpenAIModelsDirect } from './openai';
 
@@ -35,7 +35,14 @@ export const getModels = async (
 	let models = res?.data ?? [];
 
 	if (connections && !base) {
-		let localModels = [];
+		let localModels: Array<{
+			id: string;
+			name: string;
+			owned_by: string;
+			openai: { id: string };
+			urlIdx: string;
+			tags?: string[];
+		}> = [];
 
 		if (connections) {
 			const OPENAI_API_BASE_URLS = connections.OPENAI_API_BASE_URLS;
@@ -137,9 +144,11 @@ export const getModels = async (
 		);
 
 		// Remove duplicates
-		const modelsMap = {};
+		const modelsMap: Record<string, typeof models[number]> = {};
 		for (const model of models) {
-			modelsMap[model.id] = model;
+			if (typeof model.id === 'string') {
+				modelsMap[model.id] = model;
+			}
 		}
 
 		models = Object.values(modelsMap);
@@ -367,7 +376,7 @@ export const executeToolServer = async (
 			operation.parameters.forEach((param: any) => {
 				const paramName = param.name;
 				const paramIn = param.in;
-				if (params.hasOwnProperty(paramName)) {
+				if (Object.prototype.hasOwnProperty.call(params, paramName)) {
 					if (paramIn === 'path') {
 						pathParams[paramName] = params[paramName];
 					} else if (paramIn === 'query') {
@@ -394,7 +403,7 @@ export const executeToolServer = async (
 
 		// Handle requestBody composite
 		if (operation.requestBody && operation.requestBody.content) {
-			const contentType = Object.keys(operation.requestBody.content)[0];
+			Object.keys(operation.requestBody.content)[0];
 			if (params !== undefined) {
 				bodyParams = params;
 			} else {
@@ -409,7 +418,7 @@ export const executeToolServer = async (
 			...(token && { authorization: `Bearer ${token}` })
 		};
 
-		let requestOptions: RequestInit = {
+		const requestOptions: RequestInit = {
 			method: httpMethod.toUpperCase(),
 			headers
 		};
@@ -425,8 +434,8 @@ export const executeToolServer = async (
 		}
 
 		return await res.json();
-	} catch (err: any) {
-		error = err.message;
+	} catch (err: unknown) {
+		error = err instanceof Error ? err.message : String(err);
 		console.error('API Request Error:', error);
 		return { error };
 	}
@@ -658,7 +667,7 @@ export const generateQueries = async (
 	model: string,
 	messages: object[],
 	prompt: string,
-	type?: string = 'web_search'
+	type: string = 'web_search'
 ) => {
 	let error = null;
 
@@ -854,7 +863,7 @@ export const getPipelinesList = async (token: string = '') => {
 		throw error;
 	}
 
-	let pipelines = res?.data ?? [];
+	const pipelines = res?.data ?? [];
 	return pipelines;
 };
 
@@ -997,7 +1006,7 @@ export const getPipelines = async (token: string, urlIdx?: string) => {
 		throw error;
 	}
 
-	let pipelines = res?.data ?? [];
+	const pipelines = res?.data ?? [];
 	return pipelines;
 };
 

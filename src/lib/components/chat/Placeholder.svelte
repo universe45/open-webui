@@ -31,18 +31,18 @@
 	export let history;
 
 	export let prompt = '';
-	export let files = [];
+	export let files: any[] = [];
 
-	export let selectedToolIds = [];
+	export let selectedToolIds: string[] = [];
 	export let imageGenerationEnabled = false;
 	export let codeInterpreterEnabled = false;
 	export let webSearchEnabled = false;
 
-	export let toolServers = [];
+	export let toolServers: any[] = [];
 
 	let models = [];
 
-	const selectSuggestionPrompt = async (p) => {
+	const selectSuggestionPrompt = async (p: any) => {
 		let text = p;
 
 		if (p.includes('{{CLIPBOARD}}')) {
@@ -113,7 +113,7 @@
 						{#each models as model, modelIdx}
 							<Tooltip
 								content={(models[modelIdx]?.info?.meta?.tags ?? [])
-									.map((tag) => tag.name.toUpperCase())
+									.map((tag: { name: string }) => tag.name.toUpperCase())
 									.join(', ')}
 								placement="top"
 							>
@@ -142,7 +142,7 @@
 					{#if models[selectedModelIdx]?.name}
 						{models[selectedModelIdx]?.name}
 					{:else}
-						{$i18n.t('Hello, {{name}}', { name: $user.name })}
+						{$i18n.t('Hello, {{name}}', { name: $user?.name ?? 'Guest' })}
 					{/if}
 				</div>
 			</div>
