@@ -1409,9 +1409,17 @@ export interface ModelConfig {
 }
 
 export interface ModelMeta {
+	user: {
+		name: string;
+		username: string;
+		community: string;
+	}
+	name: string;
+	tags: undefined;
 	description?: string;
 	capabilities?: object;
 	profile_image_url?: string;
+	suggestion_prompts: undefined;
 }
 
 export interface ModelParams {}
