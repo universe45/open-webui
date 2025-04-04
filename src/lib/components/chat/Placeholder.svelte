@@ -7,10 +7,9 @@
 
 	const dispatch = createEventDispatcher();
 
-	import { config, user, models as _models, temporaryChatEnabled } from '$lib/stores';
+	import { config, user, models as _models, temporaryChatEnabled } from '$lib/stores'; 
 	import { sanitizeResponseContent, findWordIndices } from '$lib/utils';
 	import { WEBUI_BASE_URL } from '$lib/constants';
-
 	import Suggestions from './Suggestions.svelte';
 	import Tooltip from '$lib/components/common/Tooltip.svelte';
 	import EyeSlash from '$lib/components/icons/EyeSlash.svelte';
@@ -113,7 +112,7 @@
 						{#each models as model, modelIdx}
 							<Tooltip
 								content={(models[modelIdx]?.info?.meta?.tags ?? [])
-									.map((tag: { name: string }) => tag.name.toUpperCase())
+									.map((tag) => tag.name.toUpperCase())
 									.join(', ')}
 								placement="top"
 							>
@@ -161,7 +160,7 @@
 								class="mt-0.5 px-2 text-sm font-normal text-gray-500 dark:text-gray-400 line-clamp-2 max-w-xl markdown"
 							>
 								{@html marked.parse(
-									sanitizeResponseContent(models[selectedModelIdx]?.info?.meta?.description)
+									sanitizeResponseContent(models[selectedModelIdx]?.info?.meta?.description ?? '')
 								)}
 							</div>
 						</Tooltip>
