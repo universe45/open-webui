@@ -1,4 +1,5 @@
 <script lang="ts">
+	import i18n from '$lib/i18n';
 	import { models, showSettings, settings, user, mobile, config } from '$lib/stores';
 	import { onMount, tick, getContext } from 'svelte';
 	import { toast } from 'svelte-sonner';
@@ -6,7 +7,6 @@
 	import Tooltip from '../common/Tooltip.svelte';
 
 	import { updateUserSettings } from '$lib/apis/users';
-	const i18n = getContext('i18n');
 
 	export let selectedModels = [''];
 	export let disabled = false;
@@ -45,7 +45,7 @@
 							label: model.name,
 							model: model
 						}))}
-						showTemporaryChatControl={$user.role === 'user'
+						showTemporaryChatControl={($user?.role ?? '') === 'user'
 							? ($user?.permissions?.chat?.temporary ?? true) &&
 								!($user?.permissions?.chat?.temporary_enforced ?? false)
 							: true}

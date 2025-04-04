@@ -123,6 +123,12 @@ type SessionUser = {
 	email: string;
 	name: string;
 	role: string;
+	permissions: {
+		chat:{
+			temporary: boolean;
+			temporary_enforced: boolean;
+		}
+	};
 	profile_image_url: string;
 };
 

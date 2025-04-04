@@ -1,7 +1,4 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
-	import { toast } from 'svelte-sonner';
-
 	import {
 		WEBUI_NAME,
 		chatId,
@@ -13,9 +10,7 @@
 		temporaryChatEnabled,
 		user
 	} from '$lib/stores';
-
-	import { slide } from 'svelte/transition';
-	import { page } from '$app/stores';
+	import i18n from '$lib/i18n';
 
 	import ShareChatModal from '../chat/ShareChatModal.svelte';
 	import ModelSelector from '../chat/ModelSelector.svelte';
@@ -26,9 +21,6 @@
 	import AdjustmentsHorizontal from '../icons/AdjustmentsHorizontal.svelte';
 
 	import PencilSquare from '../icons/PencilSquare.svelte';
-
-	const i18n = getContext('i18n'); // Ensure this is an object, not a store
-
 	export let initNewChat: Function;
 	export const title: string = $WEBUI_NAME;
 	export let shareEnabled: boolean = false;
