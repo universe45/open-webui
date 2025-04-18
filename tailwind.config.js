@@ -3,8 +3,9 @@ import containerQuries from '@tailwindcss/container-queries';
 
 /** @type {import('tailwindcss').Config} */
 export default {
+	mode: 'jit',
 	darkMode: 'class',
-	content: ['./src/**/*.{html,js,svelte,ts}'],
+	content: ['./src/**/*.{html,js,jsx,svelte,ts,tsx}'],
 	theme: {
 		extend: {
 			colors: {

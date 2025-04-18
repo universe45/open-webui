@@ -114,6 +114,7 @@
 		"turndown": "^7.2.0",
 		"undici": "^7.3.0",
 		"uuid": "^9.0.1",
+		"uuidv4": "^6.2.13",
 		"vite-plugin-static-copy": "^2.2.0",
 		"yaml": "^2.7.1"
 	},
