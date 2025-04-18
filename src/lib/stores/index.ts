@@ -111,6 +111,11 @@ type Config = {
 			[key: string]: string;
 		};
 	};
+	license_metadata: {
+		type: string;
+		seats: number | undefined;
+	};
+	user_count: number | undefined;
 };
 
 type PromptSuggestion = {
@@ -127,6 +132,7 @@ type SessionUser = {
 		chat:{
 			temporary: boolean;
 			temporary_enforced: boolean;
+			controls: string;
 		}
 	};
 	profile_image_url: string;
