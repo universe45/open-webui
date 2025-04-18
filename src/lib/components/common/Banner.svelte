@@ -29,7 +29,7 @@
 		error: 'bg-red-500/20 text-red-700 dark:text-red-200'
 	};
 
-	const dismiss = (id) => {
+	const dismiss = (id: string) => {
 		dismissed = true;
 		dispatch('dismiss', id);
 	};
@@ -114,7 +114,7 @@
 				</div>
 			{/if}
 			<div class="flex self-start">
-				{#if banner.dismissible}
+				{#if banner.dismissable}
 					<button
 						on:click={() => {
 							dismiss(banner.id);

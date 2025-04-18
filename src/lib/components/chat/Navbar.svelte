@@ -25,15 +25,13 @@
 	import PencilSquare from '../icons/PencilSquare.svelte';
 	import Banner from '../common/Banner.svelte';
 
-	const i18n = getContext('i18n');
-
 	export let initNewChat: Function;
 	export const title: string = $WEBUI_NAME;
 	export let shareEnabled: boolean = false;
 
 	export let chat;
 	export let history;
-	export let selectedModels;
+	export let selectedModels: string[] | undefined;
 	export let showModelSelector = true;
 
 	let showShareChatModal = false;
@@ -177,12 +175,14 @@
 		</div>
 	</div>
 
-	{#if !history.currentId && !$chatId && ($banners.length > 0 || ($config?.license_metadata?.type ?? null) === 'trial' || (($config?.license_metadata?.seats ?? null) !== null && $config?.user_count > $config?.license_metadata?.seats))}
+	{#if !history.currentId && !$chatId && ($banners.length > 0 || ($config?.license_metadata?.type ?? null) === 'trial' || (($config?.license_metadata?.seats ?? null) !== null && ($config?.user_count ?? 0) > ($config?.license_metadata?.seats ?? 0)))}
 		<div class=" w-full z-30 mt-5">
 			<div class=" flex flex-col gap-1 w-full">
 				{#if ($config?.license_metadata?.type ?? null) === 'trial'}
 					<Banner
 						banner={{
+							id: 'trial-license-banner',
+							timestamp: Date.now(),
 							type: 'info',
 							title: 'Trial License',
 							content: $i18n.t(
@@ -192,9 +192,11 @@
 					/>
 				{/if}
 
-				{#if ($config?.license_metadata?.seats ?? null) !== null && $config?.user_count > $config?.license_metadata?.seats}
+				{#if ($config?.license_metadata?.seats ?? null) !== null && (($config?.user_count ?? 0) > ($config?.license_metadata?.seats ?? 0))}
 					<Banner
 						banner={{
+							id: 'license-error-banner',
+							timestamp: Date.now(),
 							type: 'error',
 							title: 'License Error',
 							content: $i18n.t(
@@ -204,7 +206,7 @@
 					/>
 				{/if}
 
-				{#each $banners.filter( (b) => (b.dismissible ? !JSON.parse(localStorage.getItem('dismissedBannerIds') ?? '[]').includes(b.id) : true) ) as banner}
+				{#each $banners.filter( (b) => (b.dismissable ? !JSON.parse(localStorage.getItem('dismissedBannerIds') ?? '[]').includes(b.id) : true) ) as banner}
 					<Banner
 						{banner}
 						on:dismiss={(e) => {

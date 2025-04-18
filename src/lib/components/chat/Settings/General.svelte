@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { toast } from 'svelte-sonner';
 	import { createEventDispatcher, onMount, getContext } from 'svelte';
+	import i18n from '$lib/i18n';
 	import { getLanguages, changeLanguage } from '$lib/i18n';
 	const dispatch = createEventDispatcher();
 
 	import { models, settings, theme, user } from '$lib/stores';
-
-	const i18n = getContext('i18n');
 
 	import AdvancedParams from './Advanced/AdvancedParams.svelte';
 	import Textarea from '$lib/components/common/Textarea.svelte';
@@ -41,7 +40,7 @@
 	};
 
 	// Advanced
-	let requestFormat = null;
+	let requestFormat: string | null | object = null;
 	let keepAlive: string | null = null;
 
 	let params = {
@@ -62,16 +61,19 @@
 		top_k: null,
 		top_p: null,
 		min_p: null,
-		stop: null,
+		stop: null as string | null,
 		tfs_z: null,
 		num_ctx: null,
 		num_batch: null,
 		num_keep: null,
 		max_tokens: null,
-		num_gpu: null
+		num_gpu: null,
+		use_mmap: null,
+		use_mlock: null,
+		num_thread: null
 	};
 
-	const validateJSON = (json) => {
+	const validateJSON = (json: string) => {
 		try {
 			const obj = JSON.parse(json);
 
@@ -94,11 +96,13 @@
 
 	const saveHandler = async () => {
 		if (requestFormat !== null && requestFormat !== 'json') {
-			if (validateJSON(requestFormat) === false) {
+			if (typeof requestFormat === 'string' && validateJSON(requestFormat) === false) {
 				toast.error($i18n.t('Invalid JSON schema'));
 				return;
 			} else {
-				requestFormat = JSON.parse(requestFormat);
+				if (typeof requestFormat === 'string') {
+					requestFormat = JSON.parse(requestFormat);
+				}
 			}
 		}
 
@@ -108,7 +112,7 @@
 				stream_response: params.stream_response !== null ? params.stream_response : undefined,
 				function_calling: params.function_calling !== null ? params.function_calling : undefined,
 				seed: (params.seed !== null ? params.seed : undefined) ?? undefined,
-				stop: params.stop ? params.stop.split(',').filter((e) => e) : undefined,
+				stop: params.stop ? params.stop.split(',').filter((e) => e.trim()) : undefined,
 				temperature: params.temperature !== null ? params.temperature : undefined,
 				reasoning_effort: params.reasoning_effort !== null ? params.reasoning_effort : undefined,
 				logit_bias: params.logit_bias !== null ? params.logit_bias : undefined,
@@ -132,7 +136,7 @@
 				num_thread: params.num_thread !== null ? params.num_thread : undefined,
 				num_gpu: params.num_gpu !== null ? params.num_gpu : undefined
 			},
-			keepAlive: keepAlive ? (isNaN(keepAlive) ? keepAlive : parseInt(keepAlive)) : undefined,
+			keepAlive: keepAlive ? (isNaN(Number(keepAlive)) ? keepAlive : parseInt(keepAlive, 10)) : undefined,
 			requestFormat: requestFormat !== null ? requestFormat : undefined
 		});
 		dispatch('save');
@@ -316,7 +320,7 @@
 				<Textarea
 					bind:value={system}
 					className="w-full text-sm bg-white dark:text-gray-300 dark:bg-gray-900 outline-hidden resize-none"
-					rows="4"
+					rows={4}
 					placeholder={$i18n.t('Enter system prompt here')}
 				/>
 			</div>
