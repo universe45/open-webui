@@ -12,7 +12,7 @@
 
 	export let open = true;
 
-	export let id = '';
+	export const id = '';
 	export let name = '';
 	export let collapsible = true;
 
@@ -23,29 +23,29 @@
 
 	export let className = '';
 
-	let folderElement;
+	let folderElement: HTMLElement | null = null;
 
 	let draggedOver = false;
 
-	const onDragOver = (e) => {
+	const onDragOver = (e: DragEvent) => {
 		e.preventDefault();
 		e.stopPropagation();
 		draggedOver = true;
 	};
 
-	const onDrop = (e) => {
+	const onDrop = (e: DragEvent) => {
 		e.preventDefault();
 		e.stopPropagation();
 
-		if (folderElement.contains(e.target)) {
+		if (folderElement && folderElement.contains(e.target as Node)) {
 			console.log('Dropped on the Button');
 
-			if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+			if (e.dataTransfer && e.dataTransfer.items && e.dataTransfer.items.length > 0) {
 				// Iterate over all items in the DataTransferItemList use functional programming
 				for (const item of Array.from(e.dataTransfer.items)) {
 					// If dropped items aren't files, reject them
-					if (item.kind === 'file') {
-						const file = item.getAsFile();
+					if ((item as DataTransferItem).kind === 'file') {
+						const file = (item as DataTransferItem).getAsFile();
 						if (file && file.type === 'application/json') {
 							console.log('Dropped file is a JSON file!');
 
@@ -53,10 +53,11 @@
 							const reader = new FileReader();
 							reader.onload = async function (event) {
 								try {
-									const fileContent = JSON.parse(event.target.result);
+									if (event.target && typeof event.target.result === 'string') {
+										const fileContent = JSON.parse(event.target.result);
 									console.log('Parsed JSON Content: ', fileContent);
 									open = true;
-									dispatch('import', fileContent);
+									}
 								} catch (error) {
 									console.error('Error parsing JSON file:', error);
 								}
@@ -83,7 +84,7 @@
 		}
 	};
 
-	const onDragLeave = (e) => {
+	const onDragLeave = (e: DragEvent) => {
 		e.preventDefault();
 		e.stopPropagation();
 
@@ -94,6 +95,9 @@
 		if (!dragAndDrop) {
 			return;
 		}
+		if (!folderElement) {
+			return;
+		}
 		folderElement.addEventListener('dragover', onDragOver);
 		folderElement.addEventListener('drop', onDrop);
 		folderElement.addEventListener('dragleave', onDragLeave);
@@ -101,6 +105,9 @@
 
 	onDestroy(() => {
 		if (!dragAndDrop) {
+			return;
+		}
+		if (!folderElement) {
 			return;
 		}
 		folderElement.addEventListener('dragover', onDragOver);
