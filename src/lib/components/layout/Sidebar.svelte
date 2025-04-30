@@ -24,7 +24,7 @@
 	} from '$lib/stores';
 	import { onMount, getContext, tick, onDestroy } from 'svelte';
 
-	const i18n = getContext('i18n');
+	import i18n from '$lib/i18n';
 
 	import {
 		deleteChatById,
@@ -66,7 +66,7 @@
 
 	let shiftKey = false;
 
-	let selectedChatId = null;
+	let selectedChatId: string | null = null;
 	let showDropdown = false;
 	let showPinnedChat = true;
 
@@ -77,7 +77,7 @@
 	let allChatsLoaded = false;
 
 	let folders = {};
-	let newFolderId = null;
+	let newFolderId: string | null = null;
 
 	const initFolders = async () => {
 		const folderList = await getFolders(localStorage.token).catch((error) => {
@@ -204,7 +204,7 @@
 		chatListLoading = false;
 	};
 
-	let searchDebounceTimeout;
+	let searchDebounceTimeout: NodeJS.Timeout | null = null;
 
 	const searchDebounceHandler = async () => {
 		console.log('search', search);
@@ -223,14 +223,14 @@
 				currentChatPage.set(1);
 				await chats.set(await getChatListBySearchText(localStorage.token, search));
 
-				if ($chats.length === 0) {
+				if ($chats && $chats.length === 0) {
 					tags.set(await getAllTags(localStorage.token));
 				}
 			}, 1000);
 		}
 	};
 
-	const importChatHandler = async (items, pinned = false, folderId = null) => {
+	const importChatHandler = async (items: Array<{ chat: any; meta?: any }>, pinned = false, folderId: string | null = null) => {
 		console.log('importChatHandler', items, pinned, folderId);
 		for (const item of items) {
 			console.log(item);
@@ -242,17 +242,21 @@
 		initChatList();
 	};
 
-	const inputFilesHandler = async (files) => {
+	const inputFilesHandler = async (files: FileList | Array<File>) => {
 		console.log(files);
 
 		for (const file of files) {
 			const reader = new FileReader();
 			reader.onload = async (e) => {
-				const content = e.target.result;
-
+				const content = e.target?.result;
+				
 				try {
-					const chatItems = JSON.parse(content);
-					importChatHandler(chatItems);
+					if (typeof content === 'string') {
+						const chatItems = JSON.parse(content);
+						importChatHandler(chatItems);
+					} else {
+						toast.error($i18n.t(`Invalid file format.`));
+					}
 				} catch {
 					toast.error($i18n.t(`Invalid file format.`));
 				}
@@ -262,7 +266,7 @@
 		}
 	};
 
-	const tagEventHandler = async (type, tagName, chatId) => {
+	const tagEventHandler = async (type: string, tagName: string, chatId: string) => {
 		console.log(type, tagName, chatId);
 		if (type === 'delete') {
 			initChatList();
@@ -288,7 +292,7 @@
 		draggedOver = false;
 	};
 
-	const onDrop = async (e) => {
+	const onDrop = async (e: DragEvent) => {
 		e.preventDefault();
 		console.log(e); // Log the drop event
 
@@ -305,39 +309,39 @@
 		draggedOver = false; // Reset draggedOver status after drop
 	};
 
-	let touchstart;
-	let touchend;
+	let touchstart: Touch | null = null;
+	let touchend: Touch | null = null;
 
 	function checkDirection() {
 		const screenWidth = window.innerWidth;
-		const swipeDistance = Math.abs(touchend.screenX - touchstart.screenX);
-		if (touchstart.clientX < 40 && swipeDistance >= screenWidth / 8) {
-			if (touchend.screenX < touchstart.screenX) {
+		const swipeDistance = touchend && touchstart ? Math.abs(touchend.screenX - touchstart.screenX) : 0;
+		if (touchstart && touchstart.clientX < 40 && swipeDistance >= screenWidth / 8) {
+			if (touchend && touchend.screenX < touchstart.screenX) {
 				showSidebar.set(false);
 			}
-			if (touchend.screenX > touchstart.screenX) {
+			if (touchend && touchend.screenX > touchstart.screenX) {
 				showSidebar.set(true);
 			}
 		}
 	}
 
-	const onTouchStart = (e) => {
+	const onTouchStart = (e: TouchEvent) => {
 		touchstart = e.changedTouches[0];
 		console.log(touchstart.clientX);
 	};
 
-	const onTouchEnd = (e) => {
+	const onTouchEnd = (e: TouchEvent) => {
 		touchend = e.changedTouches[0];
 		checkDirection();
 	};
 
-	const onKeyDown = (e) => {
+	const onKeyDown = (e: KeyboardEvent) => {
 		if (e.key === 'Shift') {
 			shiftKey = true;
 		}
 	};
 
-	const onKeyUp = (e) => {
+	const onKeyUp = (e: KeyboardEvent) => {
 		if (e.key === 'Shift') {
 			shiftKey = false;
 		}
@@ -446,7 +450,9 @@
 		});
 
 		if (res) {
-			$socket.emit('join-channels', { auth: { token: $user?.token } });
+			if ($socket) {
+				$socket.emit('join-channels', { auth: { token: $user?.token } });
+			}
 			await initChannels();
 			showCreateChannel = false;
 		}
@@ -679,7 +685,7 @@
 						if (chat) {
 							console.log(chat);
 							if (chat.folder_id) {
-								const res = await updateChatFolderIdById(localStorage.token, chat.id, null).catch(
+								const res = await updateChatFolderIdById(localStorage.token, chat.id, undefined).catch(
 									(error) => {
 										toast.error(`${error}`);
 										return null;
@@ -698,7 +704,7 @@
 							return;
 						}
 
-						const res = await updateFolderParentIdById(localStorage.token, id, null).catch(
+						const res = await updateFolderParentIdById(localStorage.token, id, undefined).catch(
 							(error) => {
 								toast.error(`${error}`);
 								return null;
@@ -744,7 +750,7 @@
 											const res = await updateChatFolderIdById(
 												localStorage.token,
 												chat.id,
-												null
+												undefined
 											).catch((error) => {
 												toast.error(`${error}`);
 												return null;

@@ -7,6 +7,74 @@ import type { Socket } from 'socket.io-client';
 import emojiShortCodes from '$lib/emoji-shortcodes.json';
 
 // Frontend
+export const MODEL_DOWNLOAD_POOL = writable({});
+
+export const mobile = writable(false);
+
+export const socket: Writable<null | Socket> = writable(null);
+export const activeUserIds: Writable<null | string[]> = writable(null);
+export const USAGE_POOL: Writable<null | string[]> = writable(null);
+
+export const theme = writable('system');
+
+export const shortCodesToEmojis = writable(
+	Object.entries(emojiShortCodes).reduce((acc: Record<string, string>, [key, value]) => {
+		if (typeof value === 'string') {
+			acc[value] = key;
+		} else {
+			for (const v of value) {
+				acc[v] = key;
+			}
+		}
+
+		return acc;
+	}, {} as Record<string, string>)
+);
+
+export const TTSWorker = writable(null);
+
+export const chatId = writable('');
+export const chatTitle = writable('');
+
+export const channels = writable([]);
+export const chats = writable(null);
+export const pinnedChats = writable([]);
+export const tags = writable([]);
+
+export const models: Writable<Model[]> = writable([]);
+
+export const prompts: Writable<null | Prompt[]> = writable(null);
+export const knowledge: Writable<null | Document[]> = writable(null);
+export const tools = writable(null);
+export const functions = writable(null);
+
+export const toolServers = writable([]);
+
+export const banners: Writable<Banner[]> = writable([]);
+
+export const settings: Writable<Settings> = writable({
+	chatDirection: 'LTR' // Default value for chatDirection
+});
+
+export const showSidebar = writable(false);
+export const showSettings = writable(false);
+export const showArchivedChats = writable(false);
+export const showChangelog = writable(false);
+
+export const showControls = writable(false);
+export const showOverview = writable(false);
+export const showArtifacts = writable(false);
+export const showCallOverlay = writable(false);
+
+export const temporaryChatEnabled = writable(false);
+export const scrollPaginationEnabled = writable(false);
+export const currentChatPage = writable(1);
+
+export const isLastActiveTab = writable(true);
+export const playingNotificationSound = writable(false);
+
+export type Model = OpenAIModel | OllamaModel;
+
 type BaseModel = {
 	id: string;
 	name: string;
@@ -24,6 +92,7 @@ type OllamaModelDetails = {
 };
 
 type Settings = {
+	directConnections?: undefined;
 	models?: string[];
 	conversationMode?: boolean;
 	speechAutoSend?: boolean;
@@ -95,6 +164,8 @@ type Config = {
 		auth: boolean;
 		auth_trusted_header: boolean;
 		enable_api_key: boolean;
+		enable_channels: boolean;
+		enable_direct_connections: boolean;
 		enable_signup: boolean;
 		enable_login_form: boolean;
 		enable_web_search?: boolean;
@@ -125,6 +196,15 @@ type PromptSuggestion = {
 
 type SessionUser = {
 	id: string;
+	token: string;
+	permissions: {
+		workspace: {
+			models: string[];
+			knowledge: string[];
+			prompts: string[];
+			tools: string[];
+		};
+	};
 	email: string;
 	name: string;
 	role: string;
