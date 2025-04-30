@@ -2,7 +2,7 @@
 	import { toast } from 'svelte-sonner';
 	import { goto, invalidate, invalidateAll } from '$app/navigation';
 	import { onMount, getContext, createEventDispatcher, tick, onDestroy } from 'svelte';
-	const i18n = getContext('i18n');
+	import  i18n  from '$lib/i18n';
 
 	const dispatch = createEventDispatcher();
 
@@ -47,7 +47,7 @@
 	export let selected = false;
 	export let shiftKey = false;
 
-	let chat = null;
+	let chat: any = null;
 
 	let mouseOver = false;
 	let draggable = false;
@@ -68,7 +68,7 @@
 
 	let chatTitle = title;
 
-	const editChatTitle = async (id, title) => {
+	const editChatTitle = async (id: string, title: string) => {
 		if (title === '') {
 			toast.error($i18n.t('Title cannot be an empty string.'));
 		} else {
@@ -88,7 +88,7 @@
 		}
 	};
 
-	const cloneChatHandler = async (id) => {
+	const cloneChatHandler = async (id: string) => {
 		const res = await cloneChatById(
 			localStorage.token,
 			id,
@@ -109,7 +109,7 @@
 		}
 	};
 
-	const deleteChatHandler = async (id) => {
+	const deleteChatHandler = async (id: string) => {
 		const res = await deleteChatById(localStorage.token, id).catch((error) => {
 			toast.error(`${error}`);
 			return null;
@@ -128,16 +128,16 @@
 		}
 	};
 
-	const archiveChatHandler = async (id) => {
+	const archiveChatHandler = async (id: string) => {
 		await archiveChatById(localStorage.token, id);
 		dispatch('change');
 	};
 
-	const focusEdit = async (node: HTMLInputElement) => {
+	const focusEdit = (node: HTMLInputElement) => {
 		node.focus();
 	};
 
-	let itemElement;
+	let itemElement: any;
 
 	let dragged = false;
 	let x = 0;
@@ -147,33 +147,35 @@
 	dragImage.src =
 		'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
 
-	const onDragStart = (event) => {
+	const onDragStart = (event: DragEvent) => {
 		event.stopPropagation();
 
-		event.dataTransfer.setDragImage(dragImage, 0, 0);
+		if (event.dataTransfer) {
+			event.dataTransfer.setDragImage(dragImage, 0, 0);
 
-		// Set the data to be transferred
-		event.dataTransfer.setData(
-			'text/plain',
-			JSON.stringify({
-				type: 'chat',
-				id: id,
-				item: chat
-			})
-		);
+			// Set the data to be transferred
+			event.dataTransfer.setData(
+				'text/plain',
+				JSON.stringify({
+					type: 'chat',
+					id: id,
+					item: chat
+				})
+			);
+		}
 
 		dragged = true;
 		itemElement.style.opacity = '0.5'; // Optional: Visual cue to show it's being dragged
 	};
 
-	const onDrag = (event) => {
+	const onDrag = (event: DragEvent) => {
 		event.stopPropagation();
 
 		x = event.clientX;
 		y = event.clientY;
 	};
 
-	const onDragEnd = (event) => {
+	const onDragEnd = (event: DragEvent) => {
 		event.stopPropagation();
 
 		itemElement.style.opacity = '1'; // Reset visual cue after drag
@@ -201,7 +203,7 @@
 
 	let showDeleteConfirm = false;
 
-	const chatTitleInputKeydownHandler = (e) => {
+	const chatTitleInputKeydownHandler = (e: KeyboardEvent) => {
 		if (e.key === 'Enter') {
 			e.preventDefault();
 			editChatTitle(id, chatTitle);

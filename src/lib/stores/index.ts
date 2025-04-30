@@ -28,7 +28,7 @@ export const USAGE_POOL: Writable<null | string[]> = writable(null);
 export const theme = writable('system');
 
 export const shortCodesToEmojis = writable(
-	Object.entries(emojiShortCodes).reduce((acc, [key, value]) => {
+	Object.entries(emojiShortCodes).reduce((acc: Record<string, string>, [key, value]) => {
 		if (typeof value === 'string') {
 			acc[value] = key;
 		} else {
@@ -38,7 +38,7 @@ export const shortCodesToEmojis = writable(
 		}
 
 		return acc;
-	}, {})
+	}, {} as Record<string, string>)
 );
 
 export const TTSWorker = writable(null);
@@ -62,7 +62,9 @@ export const toolServers = writable([]);
 
 export const banners: Writable<Banner[]> = writable([]);
 
-export const settings: Writable<Settings> = writable({});
+export const settings: Writable<Settings> = writable({
+	chatDirection: 'LTR' // Default value for chatDirection
+});
 
 export const showSidebar = writable(false);
 export const showSettings = writable(false);
@@ -132,6 +134,7 @@ type OllamaModelDetails = {
 };
 
 type Settings = {
+	directConnections?: undefined;
 	models?: string[];
 	conversationMode?: boolean;
 	speechAutoSend?: boolean;
@@ -203,6 +206,8 @@ type Config = {
 		auth: boolean;
 		auth_trusted_header: boolean;
 		enable_api_key: boolean;
+		enable_channels: boolean;
+		enable_direct_connections: boolean;
 		enable_signup: boolean;
 		enable_login_form: boolean;
 		enable_web_search?: boolean;
@@ -228,6 +233,15 @@ type PromptSuggestion = {
 
 type SessionUser = {
 	id: string;
+	token: string;
+	permissions: {
+		workspace: {
+			models: string[];
+			knowledge: string[];
+			prompts: string[];
+			tools: string[];
+		};
+	};
 	email: string;
 	name: string;
 	role: string;
