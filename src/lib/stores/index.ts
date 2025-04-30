@@ -204,17 +204,15 @@ type SessionUser = {
 			prompts: string[];
 			tools: string[];
 		};
+		chat: {
+			temporary: boolean;
+			temporary_enforced: boolean;
+			controls: string;
+		};
 	};
 	email: string;
 	name: string;
 	role: string;
-	permissions: {
-		chat:{
-			temporary: boolean;
-			temporary_enforced: boolean;
-			controls: string;
-		}
-	};
 	profile_image_url: string;
 };
 
@@ -249,73 +247,6 @@ export interface OllamaModel extends BaseModel {
 		urls?: number[];
 	};
 }
-
-export const shortCodesToEmojis = writable(
-	Object.entries(emojiShortCodes).reduce((acc: Record<string, string>, [key, value]) => {
-		if (typeof value === 'string') {
-			acc[value] = key;
-		} else {
-			for (const v of value) {
-				acc[v] = key;
-			}
-		}
-
-		return acc;
-	}, {})
-);
-
-export const MODEL_DOWNLOAD_POOL = writable({});
-export type Model = OpenAIModel | OllamaModel;
-export const mobile = writable(false);
-
-export const socket: Writable<null | Socket> = writable(null);
-export const activeUserIds: Writable<null | string[]> = writable(null);
-export const USAGE_POOL: Writable<null | string[]> = writable(null);
-
-export const theme = writable('system');
-
-
-export const TTSWorker = writable(null);
-
-export const chatId = writable('');
-export const chatTitle = writable('');
-
-export const channels = writable([]);
-export const chats = writable(null);
-export const pinnedChats = writable([]);
-export const tags = writable([]);
-
-export const models: Writable<Model[]> = writable([]);
-
-export const prompts: Writable<null | Prompt[]> = writable(null);
-export const knowledge: Writable<null | Document[]> = writable(null);
-export const tools = writable(null);
-export const functions = writable(null);
-
-export const toolServers = writable([]);
-
-export const banners: Writable<Banner[]> = writable([]);
-
-export const settings: Writable<Settings> = writable({
-	chatDirection: 'LTR' // Default value for the required property
-});
-
-export const showSidebar = writable(false);
-export const showSettings = writable(false);
-export const showArchivedChats = writable(false);
-export const showChangelog = writable(false);
-
-export const showControls = writable(false);
-export const showOverview = writable(false);
-export const showArtifacts = writable(false);
-export const showCallOverlay = writable(false);
-
-export const temporaryChatEnabled = writable(false);
-export const scrollPaginationEnabled = writable(false);
-export const currentChatPage = writable(1);
-
-export const isLastActiveTab = writable(true);
-export const playingNotificationSound = writable(false);
 
 // Backend
 export const WEBUI_NAME = writable(APP_NAME);
