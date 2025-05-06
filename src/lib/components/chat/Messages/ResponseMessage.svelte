@@ -154,7 +154,7 @@
 
 	let showRateComment = false;
 
-	const copyToClipboard = async (text) => {
+	const copyToClipboard = async (text: string) => {
 		text = removeAllDetails(text);
 
 		const res = await _copyToClipboard(text, $settings?.copyFormatted ?? false);
@@ -208,7 +208,7 @@
 
 		speaking = true;
 
-		if ($config.audio.tts.engine === '') {
+		if ($config?.audio?.tts?.engine === '') {
 			let voices = [];
 			const getVoicesLoop = setInterval(() => {
 				voices = speechSynthesis.getVoices();
@@ -273,26 +273,23 @@
 			let lastPlayedAudioPromise = Promise.resolve(); // Initialize a promise that resolves immediately
 
 			if ($settings.audio?.tts?.engine === 'browser-kokoro') {
-				if (!$TTSWorker) {
-					await TTSWorker.set(
-						new KokoroWorker({
-							dtype: $settings.audio?.tts?.engineConfig?.dtype ?? 'fp32'
-						})
-					);
-
-					await $TTSWorker.init();
-				}
+				  if (!$TTSWorker) {
+					const worker = new KokoroWorker($settings.audio?.tts?.engineConfig?.dtype ?? 'fp32');
+					$TTSWorker = worker;
+				
+					await worker.init();
+				  }
 
 				for (const [idx, sentence] of messageContentParts.entries()) {
-					const blob = await $TTSWorker
+					const blob = await $TTSWorker!
 						.generate({
 							text: sentence,
 							voice: $settings?.audio?.tts?.voice ?? $config?.audio?.tts?.voice
 						})
-						.catch((error) => {
+						.catch((error: string) => {
 							console.error(error);
 							toast.error(`${error}`);
-
+	
 							speaking = false;
 							loadingSpeech = false;
 						});
@@ -310,7 +307,7 @@
 				for (const [idx, sentence] of messageContentParts.entries()) {
 					const res = await synthesizeOpenAISpeech(
 						localStorage.token,
-						$settings?.audio?.tts?.defaultVoice === $config.audio.tts.voice
+						$settings?.audio?.tts?.defaultVoice === $config?.audio.tts.voice
 							? ($settings?.audio?.tts?.voice ?? $config?.audio?.tts?.voice)
 							: $config?.audio?.tts?.voice,
 						sentence

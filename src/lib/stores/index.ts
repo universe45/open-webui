@@ -3,6 +3,7 @@ import { type Writable, writable } from 'svelte/store';
 import type { ModelConfig } from '$lib/apis';
 import type { Banner } from '$lib/types';
 import type { Socket } from 'socket.io-client';
+import { KokoroWorker } from '$lib/workers/KokoroWorker';
 
 import emojiShortCodes from '$lib/emoji-shortcodes.json';
 
@@ -31,8 +32,7 @@ export const shortCodesToEmojis = writable(
 	}, {} as Record<string, string>)
 );
 
-export const TTSWorker = writable(null);
-
+export const TTSWorker = writable<KokoroWorker | null>(null);
 export const chatId = writable('');
 export const chatTitle = writable('');
 
@@ -92,6 +92,7 @@ type OllamaModelDetails = {
 };
 
 type Settings = {
+	copyFormatted?: boolean;
 	directConnections?: undefined;
 	models?: string[];
 	conversationMode?: boolean;
@@ -126,6 +127,15 @@ type ModelOptions = {
 type AudioSettings = {
 	STTEngine?: string;
 	TTSEngine?: string;
+	tts?: {
+		defaultVoice: string;
+		engine: string;
+		engineConfig?: {
+			dtype: string;
+		};
+		voice: string;
+		playbackRate: number;
+	}
 	speaker?: string;
 	model?: string;
 	nonLocalVoices?: boolean;
@@ -154,6 +164,13 @@ type Document = {
 };
 
 type Config = {
+	audio: {
+		tts: {
+			engine: string;
+			voice: string;
+			split_on: string;
+		}
+	};
 	status: boolean;
 	name: string;
 	version: string;
