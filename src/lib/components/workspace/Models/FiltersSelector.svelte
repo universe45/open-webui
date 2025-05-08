@@ -2,13 +2,15 @@
 	import { getContext, onMount } from 'svelte';
 	import Checkbox from '$lib/components/common/Checkbox.svelte';
 	import Tooltip from '$lib/components/common/Tooltip.svelte';
+	import About from '$lib/components/chat/Settings/About.svelte';
+	import type { Filter } from '$lib/types';
 
-	const i18n = getContext('i18n');
+	import i18n from '$lib/i18n';
 
-	export let filters = [];
-	export let selectedFilterIds = [];
+	export let filters: Array<any> = [];
+	export let selectedFilterIds: Array<any> = [];
 
-	let _filters = {};
+	let _filters: Record<string, Filter> = {};
 
 	onMount(() => {
 		_filters = filters.reduce((acc, filter) => {

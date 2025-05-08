@@ -2,11 +2,11 @@
 	import { getContext } from 'svelte';
 	import Selector from './Knowledge/Selector.svelte';
 	import FileItem from '$lib/components/common/FileItem.svelte';
+	import i18n from '$lib/i18n';
 
-	export let selectedKnowledge = [];
-	export let collections = [];
+	export let selectedKnowledge: Array<any> = [];
+	export const collections: Array<any> = [];
 
-	const i18n = getContext('i18n');
 </script>
 
 <div>
@@ -23,12 +23,13 @@
 			<div class=" flex flex-wrap items-center gap-2 mt-2">
 				{#each selectedKnowledge as file, fileIdx}
 					<FileItem
-						{file}
+						item={file}
 						name={file.name}
 						type={file?.legacy
 							? `Legacy${file.type ? ` ${file.type}` : ''}`
 							: (file?.type ?? 'Collection')}
 						dismissible
+						size={file.size}
 						on:dismiss={(e) => {
 							selectedKnowledge = selectedKnowledge.filter((_, idx) => idx !== fileIdx);
 						}}
@@ -53,7 +54,7 @@
 				}}
 			>
 				<button
-					class=" px-3.5 py-1.5 font-medium hover:bg-black/5 dark:hover:bg-white/5 outline outline-1 outline-gray-100 dark:outline-gray-850 rounded-3xl"
+					class=" px-3.5 py-1.5 font-medium hover:bg-black/5 dark:hover:bg-white/5 outline outline-gray-100 dark:outline-gray-850 rounded-3xl"
 					type="button">{$i18n.t('Select Knowledge')}</button
 				>
 			</Selector>

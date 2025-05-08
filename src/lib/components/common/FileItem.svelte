@@ -7,7 +7,7 @@
 	import Spinner from './Spinner.svelte';
 	import Tooltip from './Tooltip.svelte';
 
-	const i18n = getContext('i18n');
+	import i18n from '$lib/i18n';
 	const dispatch = createEventDispatcher();
 
 	export let className = 'w-60';
@@ -17,7 +17,7 @@
 	export let dismissible = false;
 	export let loading = false;
 
-	export let item = null;
+	export let item: null = null;
 	export let edit = false;
 	export let small = false;
 
@@ -53,9 +53,9 @@
 		} else {
 			if (url) {
 				if (type === 'file') {
-					window.open(`${url}/content`, '_blank').focus();
+					window.open(`${url}/content`, '_blank')?.focus();
 				} else {
-					window.open(`${url}`, '_blank').focus();
+					window.open(`${url}`, '_blank')?.focus();
 				}
 			}
 		}
