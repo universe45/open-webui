@@ -29,12 +29,11 @@
 	import AdjustmentsHorizontal from '$lib/components/icons/AdjustmentsHorizontal.svelte';
 	import Cube from '$lib/components/icons/Cube.svelte';
 	import { getChatById } from '$lib/apis/chats';
+	import i18n from '$lib/i18n';
 
-	const i18n = getContext('i18n');
-
-	export let shareEnabled: boolean = false;
+	export const shareEnabled: boolean = false;
 	export let shareHandler: Function;
-	export let downloadHandler: Function;
+	export const downloadHandler: Function = () => {};
 
 	// export let tagHandler: Function;
 
@@ -44,7 +43,7 @@
 	const getChatAsText = async () => {
 		const history = chat.chat.history;
 		const messages = createMessagesList(history, history.currentId);
-		const chatText = messages.reduce((a, message, i, arr) => {
+		const chatText = messages.reduce((a: string, message: { role: string; content: string }, i: number, arr: { role: string; content: string }[]) => {
 			return `${a}### ${message.role.toUpperCase()}\n${message.content}\n\n`;
 		}, '');
 
@@ -73,7 +72,7 @@
 				// Define a fixed virtual screen size
 				const virtualWidth = 800; // Fixed width (adjust as needed)
 				// Clone the container to avoid layout shifts
-				const clonedElement = containerElement.cloneNode(true);
+				const clonedElement = containerElement.cloneNode(true) as HTMLElement;
 				clonedElement.classList.add('text-black');
 				clonedElement.classList.add('dark:text-white');
 				clonedElement.style.width = `${virtualWidth}px`; // Apply fixed width
