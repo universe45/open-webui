@@ -14,22 +14,21 @@
 	import Switch from '$lib/components/common/Switch.svelte';
 	import Tooltip from '$lib/components/common/Tooltip.svelte';
 	import { WEBUI_BUILD_HASH, WEBUI_VERSION } from '$lib/constants';
-	import { config, showChangelog } from '$lib/stores';
+	import { config, showChangelog, type AdminConfig } from '$lib/stores';
 	import { compareVersion } from '$lib/utils';
 	import { onMount, getContext } from 'svelte';
 	import { toast } from 'svelte-sonner';
-
-	const i18n = getContext('i18n');
+	import i18n from '$lib/i18n';
 
 	export let saveHandler: Function;
 
-	let updateAvailable = null;
+	let updateAvailable: boolean | null = null;
 	let version = {
 		current: '',
 		latest: ''
 	};
 
-	let adminConfig = null;
+	let adminConfig: AdminConfig | null = null;
 	let webhookUrl = '';
 
 	// LDAP
@@ -77,13 +76,16 @@
 
 	const updateHandler = async () => {
 		webhookUrl = await updateWebhookUrl(localStorage.token, webhookUrl);
-		const res = await updateAdminConfig(localStorage.token, adminConfig);
+		let res = false;
+		if (adminConfig !== null) {
+			res = await updateAdminConfig(localStorage.token, adminConfig);
+		}
 		await updateLdapServerHandler();
 
 		if (res) {
 			saveHandler();
 		} else {
-			toast.error(i18n.t('Failed to update settings'));
+			toast.error($i18n.t('Failed to update settings'));
 		}
 	};
 

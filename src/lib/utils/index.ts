@@ -439,7 +439,7 @@ export const copyToClipboard = async (text, formatted = false) => {
 	}
 };
 
-export const compareVersion = (latest, current) => {
+export const compareVersion = (latest: string, current:string) => {
 	return current === '0.0.0'
 		? false
 		: current.localeCompare(latest, undefined, {
@@ -449,7 +449,7 @@ export const compareVersion = (latest, current) => {
 			}) < 0;
 };
 
-export const extractCurlyBraceWords = (text) => {
+export const extractCurlyBraceWords = (text: string) => {
 	const regex = /\{\{([^}]+)\}\}/g;
 	const matches = [];
 	let match;

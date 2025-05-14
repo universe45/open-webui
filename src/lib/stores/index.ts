@@ -202,9 +202,26 @@ type Config = {
 	license_metadata: {
 		type: string;
 		seats: number | undefined;
+		organization_name: string;
+		html: string;
 	};
 	user_count: number | undefined;
 };
+
+export interface AdminConfig {
+	DEFAULT_USER_ROLE: string;
+	ENABLE_SIGNUP: boolean;
+	SHOW_ADMIN_DETAILS: boolean;
+	ENABLE_API_KEY: boolean;
+	ENABLE_API_KEY_ENDPOINT_RESTRICTIONS: boolean;
+	API_KEY_ALLOWED_ENDPOINTS: string;
+	JWT_EXPIRES_IN: string;
+	ENABLE_COMMUNITY_SHARING: boolean;
+	ENABLE_MESSAGE_RATING: boolean;
+	ENABLE_CHANNELS: boolean;
+	ENABLE_USER_WEBHOOKS: boolean;
+	WEBUI_URL: string;
+}
 
 type PromptSuggestion = {
 	content: string;
