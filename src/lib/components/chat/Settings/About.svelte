@@ -8,7 +8,7 @@
 
 	import Tooltip from '$lib/components/common/Tooltip.svelte';
 
-	const i18n = getContext('i18n');
+	import i18n from '$lib/i18n';
 
 	let ollamaVersion = '';
 

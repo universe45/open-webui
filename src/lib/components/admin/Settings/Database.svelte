@@ -8,8 +8,7 @@
 	import { toast } from 'svelte-sonner';
 	import { getAllUserChats } from '$lib/apis/chats';
 	import { exportConfig, importConfig } from '$lib/apis/configs';
-
-	const i18n = getContext('i18n');
+	import i18n from '$lib/i18n';
 
 	export let saveHandler: Function;
 
@@ -41,11 +40,16 @@
 				type="file"
 				accept=".json"
 				on:change={(e) => {
+					if (!(e.target instanceof HTMLInputElement) || !e.target.files) return;
 					const file = e.target.files[0];
 					const reader = new FileReader();
 
 					reader.onload = async (e) => {
-						const res = await importConfig(localStorage.token, JSON.parse(e.target.result)).catch(
+						if (!e.target) return;
+						const result = e.target.result;
+						if (typeof result !== 'string') return;
+						
+						const res = await importConfig(localStorage.token, JSON.parse(result)).catch(
 							(error) => {
 								toast.error(`${error}`);
 							}
@@ -54,7 +58,9 @@
 						if (res) {
 							toast.success('Config imported successfully');
 						}
-						e.target.value = null;
+						// Reset the file input
+						const fileInput = document.getElementById('config-json-input');
+						if (fileInput instanceof HTMLInputElement) fileInput.value = '';
 					};
 
 					reader.readAsText(file);
@@ -65,7 +71,10 @@
 				type="button"
 				class=" flex rounded-md py-2 px-3 w-full hover:bg-gray-200 dark:hover:bg-gray-800 transition"
 				on:click={async () => {
-					document.getElementById('config-json-input').click();
+					const inputElement = document.getElementById('config-json-input');
+					if (inputElement) {
+						inputElement.click();
+					}
 				}}
 			>
 				<div class=" self-center mr-3">
@@ -156,7 +165,7 @@
 				</div>
 
 				<button
-					class=" flex rounded-md py-2 px-3 w-full hover:bg-gray-200 dark:hover:bg-gray-800 transition"
+					class=" flex rounded-md py-2 px-3 w-full hover:bg-gray-200 dark:hover:bg-gray-800 transition" disabled
 					on:click={() => {
 						exportAllUserChats();
 					}}

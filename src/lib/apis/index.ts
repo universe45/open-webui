@@ -7,7 +7,7 @@ import { toast } from 'svelte-sonner';
 
 export const getModels = async (
 	token: string = '',
-	connections: object | null = null,
+	connections: any | null = null,
 	base: boolean = false
 ) => {
 	let error = null;
