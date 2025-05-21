@@ -67,6 +67,7 @@ export const settings: Writable<Settings> = writable({
 });
 
 export const showSidebar = writable(false);
+export const showSearch = writable(false);
 export const showSettings = writable(false);
 export const showArchivedChats = writable(false);
 export const showChangelog = writable(false);
@@ -75,6 +76,8 @@ export const showControls = writable(false);
 export const showOverview = writable(false);
 export const showArtifacts = writable(false);
 export const showCallOverlay = writable(false);
+
+export const artifactCode = writable(null);
 
 export const temporaryChatEnabled = writable(false);
 export const scrollPaginationEnabled = writable(false);
@@ -218,11 +221,16 @@ type Config = {
 		enable_admin_chat_access: boolean;
 		enable_community_sharing: boolean;
 		enable_autocomplete_generation: boolean;
+		enable_direct_connections: boolean;
 	};
 	oauth: {
 		providers: {
 			[key: string]: string;
 		};
+	};
+	ui?: {
+		pending_user_overlay_title?: string;
+		pending_user_overlay_description?: string;
 	};
 };
 
