@@ -32,7 +32,9 @@
 	export let prompt = '';
 	export let files: any[] = [];
 
-	export let selectedToolIds: string[] = [];
+	export let selectedToolIds = [];
+	export let selectedFilterIds = [];
+
 	export let imageGenerationEnabled = false;
 	export let codeInterpreterEnabled = false;
 	export let webSearchEnabled = false;
@@ -191,6 +193,7 @@
 					bind:prompt
 					bind:autoScroll
 					bind:selectedToolIds
+					bind:selectedFilterIds
 					bind:imageGenerationEnabled
 					bind:codeInterpreterEnabled
 					bind:webSearchEnabled
@@ -200,6 +203,13 @@
 					{stopResponse}
 					{createMessagePair}
 					placeholder={$i18n.t('How can I help you today?')}
+					onChange={(input) => {
+						if (input.prompt !== null) {
+							localStorage.setItem(`chat-input`, JSON.stringify(input));
+						} else {
+							localStorage.removeItem(`chat-input`);
+						}
+					}}
 					on:upload={(e) => {
 						dispatch('upload', e.detail);
 					}}
