@@ -3132,3 +3132,26 @@ LDAP_ATTRIBUTE_FOR_GROUPS = PersistentConfig(
     "ldap.server.attribute_for_groups",
     os.environ.get("LDAP_ATTRIBUTE_FOR_GROUPS", "memberOf"),
 )
+
+# Pyodide Configuration
+PYODIDE_PACKAGES = PersistentConfig(
+    "PYODIDE_PACKAGES",
+    "pyodide.packages",
+    [
+        'micropip',
+        'packaging',
+        'requests',
+        'beautifulsoup4',
+        'numpy',
+        'pandas',
+        'matplotlib',
+        'scikit-learn',
+        'scipy',
+        'regex',
+        'sympy',
+        'tiktoken',
+        'seaborn',
+        'pytz',
+        'black'
+    ],
+)

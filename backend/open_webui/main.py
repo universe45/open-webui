@@ -102,6 +102,8 @@ from open_webui.models.chats import Chats
 
 from open_webui.config import (
     LICENSE_KEY,
+    # Pyodide
+    PYODIDE_PACKAGES,
     # Ollama
     ENABLE_OLLAMA_API,
     OLLAMA_BASE_URLS,
@@ -650,6 +652,7 @@ app.state.config.USER_PERMISSIONS = USER_PERMISSIONS
 app.state.config.WEBHOOK_URL = WEBHOOK_URL
 app.state.config.BANNERS = WEBUI_BANNERS
 app.state.config.MODEL_ORDER_LIST = MODEL_ORDER_LIST
+app.state.config.PYODIDE_PACKAGES = PYODIDE_PACKAGES
 
 
 app.state.config.ENABLE_CHANNELS = ENABLE_CHANNELS

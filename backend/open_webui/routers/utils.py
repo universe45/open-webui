@@ -28,6 +28,29 @@ async def get_gravatar(email: str, user=Depends(get_verified_user)):
     return get_gravatar_url(email)
 
 
+@router.get("/pyodide/packages")
+async def get_pyodide_packages(request: Request):
+    """Return the list of preloaded Pyodide packages"""
+    if hasattr(request.app.state.config, "PYODIDE_PACKAGES"):
+        return {"packages": request.app.state.config.PYODIDE_PACKAGES}
+    else:
+        # Default packages if config is not available
+        default_packages = [
+            'micropip',
+            'packaging',
+            'requests',
+            'beautifulsoup4',
+            'numpy',
+            'pandas',
+            'matplotlib',
+            'scipy',
+            'regex',
+            'sympy',
+            'tiktoken',
+        ]
+        return {"packages": default_packages}
+
+
 class CodeForm(BaseModel):
     code: str
 
