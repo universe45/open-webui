@@ -81,6 +81,7 @@
 		if (adminConfig !== null) {
 			res = await updateAdminConfig(localStorage.token, adminConfig);
 		}
+		await updateLdapConfig(localStorage.token, ENABLE_LDAP);
 		await updateLdapServerHandler();
 
 		if (res) {
@@ -313,7 +314,6 @@
 							{$i18n.t('Pending User Overlay Title')}
 						</div>
 						<Textarea
-							rows={2}
 							placeholder={$i18n.t(
 								'Enter a title for the pending user info overlay. Leave empty for default.'
 							)}
@@ -403,12 +403,7 @@
 								<div class="  font-medium">{$i18n.t('LDAP')}</div>
 
 								<div class="mt-1">
-									<Switch
-										bind:state={ENABLE_LDAP}
-										on:change={async () => {
-											updateLdapConfig(localStorage.token, ENABLE_LDAP);
-										}}
-									/>
+									<Switch bind:state={ENABLE_LDAP} />
 								</div>
 							</div>
 
