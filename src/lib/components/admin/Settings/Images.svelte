@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { toast } from 'svelte-sonner';
-
+	import i18n from '$lib/i18n';
 	import { createEventDispatcher, onMount, getContext } from 'svelte';
 	import { config as backendConfig, user } from '$lib/stores';
 
@@ -17,8 +17,6 @@
 	import Switch from '$lib/components/common/Switch.svelte';
 	import Tooltip from '$lib/components/common/Tooltip.svelte';
 	const dispatch = createEventDispatcher();
-
-	const i18n = getContext('i18n');
 
 	let loading = false;
 
