@@ -11,6 +11,11 @@ import emojiShortCodes from '$lib/emoji-shortcodes.json';
 export const MODEL_DOWNLOAD_POOL = writable({});
 
 export const mobile = writable(false);
+export const isApp = writable(false);
+export const appInfo = writable({
+	platform: '',
+	version: ''
+});
 
 export const socket: Writable<null | Socket> = writable(null);
 export const activeUserIds: Writable<null | string[]> = writable(null);
