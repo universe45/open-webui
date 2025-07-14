@@ -13,7 +13,7 @@
 	import Tooltip from '$lib/components/common/Tooltip.svelte';
 	import SensitiveInput from '$lib/components/common/SensitiveInput.svelte';
 
-	const i18n = getContext('i18n');
+	import i18n from '$lib/i18n';
 
 	export let saveHandler: Function;
 	export let saveSettings: Function;
@@ -75,8 +75,8 @@
 	};
 
 	onMount(async () => {
-		name = $user?.name;
-		profileImageUrl = $user?.profile_image_url;
+		name = $user?.name ?? '';
+		profileImageUrl = $user?.profile_image_url ?? generateInitialsImage(name);
 		webhookUrl = $settings?.notifications?.webhook_url ?? '';
 
 		APIKey = await getAPIKey(localStorage.token).catch((error) => {
@@ -98,6 +98,10 @@
 				const files = profileImageInputElement.files ?? [];
 				let reader = new FileReader();
 				reader.onload = (event) => {
+					if (!event.target || !event.target.result) {
+						toast.error($i18n.t('Failed to load image.'));
+						return;
+					}
 					let originalImageUrl = `${event.target.result}`;
 
 					const img = new Image();
@@ -106,6 +110,11 @@
 					img.onload = function () {
 						const canvas = document.createElement('canvas');
 						const ctx = canvas.getContext('2d');
+						
+						if (!ctx) {
+							toast.error($i18n.t('Failed to get canvas context.'));
+							return;
+						}
 
 						// Calculate the aspect ratio of the image
 						const aspectRatio = img.width / img.height;
@@ -214,7 +223,7 @@
 						<button
 							class=" text-xs text-center text-gray-800 dark:text-gray-400 rounded-full px-4 py-0.5 bg-gray-100 dark:bg-gray-850"
 							on:click={async () => {
-								const url = await getGravatarUrl(localStorage.token, $user?.email);
+								const url = await getGravatarUrl(localStorage.token, $user?.email || '');
 
 								profileImageUrl = url;
 							}}>{$i18n.t('Use Gravatar')}</button
