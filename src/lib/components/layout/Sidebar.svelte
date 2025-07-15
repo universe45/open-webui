@@ -948,7 +948,11 @@
 			</Folder>
 		</div>
 
-		<div class="px-2">
+		<div class="flex justify-center mt-2">
+			<div class="border-t border-gray-200 dark:border-gray-800 w-4/5"></div>
+		</div>
+
+		<div class="px-2 mt-2">
 			<div class="flex flex-col font-primary">
 				{#if $user !== undefined && $user !== null}
 					<UserMenu

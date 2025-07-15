@@ -24,7 +24,7 @@
 	></div>
 {/each}
 
-<style>
+<style lang="postcss">
 	.image {
 		position: absolute;
 		top: 0;

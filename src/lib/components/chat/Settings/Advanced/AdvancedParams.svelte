@@ -4,10 +4,11 @@
 	import Tooltip from '$lib/components/common/Tooltip.svelte';
 	import Plus from '$lib/components/icons/Plus.svelte';
 	import { getContext } from 'svelte';
+	import type { Params } from '$lib/types';
 
-	const i18n = getContext('i18n');
+	import i18n from '$lib/i18n';
 
-	export let onChange: (params: any) => void = () => {};
+	export let onChange: (params: Params) => void = () => {};
 
 	export let admin = false;
 	export let custom = false;
@@ -45,7 +46,13 @@
 		num_gpu: null
 	};
 
-	export let params = defaultParams;
+	export let params: Params = defaultParams;
+	
+	// Initialize custom_params if it doesn't exist
+	$: if (params && params.custom_params === undefined) {
+		params.custom_params = {};
+	}
+	
 	$: if (params) {
 		onChange(params);
 	}
@@ -1047,7 +1054,10 @@
 						{params.use_mmap ? 'Enabled' : 'Disabled'}
 					</div>
 					<div class=" pr-2">
-						<Switch bind:state={params.use_mmap} />
+						<Switch 
+							state={params.use_mmap === null ? false : params.use_mmap}
+							on:change={e => params.use_mmap = e.detail} 
+						/>
 					</div>
 				</div>
 			{/if}
@@ -1089,7 +1099,10 @@
 					</div>
 
 					<div class=" pr-2">
-						<Switch bind:state={params.use_mlock} />
+						<Switch 
+							state={params.use_mlock === null ? false : params.use_mlock}
+							on:change={e => params.use_mlock = e.detail} 
+						/>
 					</div>
 				</div>
 			{/if}
@@ -1158,7 +1171,14 @@
 				<Textarea
 					className="w-full  text-sm bg-transparent outline-hidden"
 					placeholder={$i18n.t('e.g. "json" or a JSON schema')}
-					bind:value={params.format}
+					value={params.format ?? ''}
+					on:input={(e) => {
+						if (!params.format) params.format = '';
+						const target = /** @type {HTMLTextAreaElement} */ (e.target);
+						if (target) {
+							params.format = target.value;
+						}
+					}}
 				/>
 			</div>
 		{/if}
@@ -1492,7 +1512,9 @@
 									placeholder={$i18n.t('Custom Parameter Name')}
 									value={key}
 									on:change={(e) => {
-										const newKey = e.target.value.trim();
+										if (!params.custom_params) params.custom_params = {};
+										const target = /** @type {HTMLInputElement} */ (e.target);
+										const newKey = target.value.trim();
 										if (newKey && newKey !== key) {
 											params.custom_params[newKey] = params.custom_params[key];
 											delete params.custom_params[key];
@@ -1508,6 +1530,7 @@
 								class="p-1 px-3 text-xs flex rounded-sm transition shrink-0 outline-hidden"
 								type="button"
 								on:click={() => {
+									if (!params.custom_params) params.custom_params = {};
 									delete params.custom_params[key];
 									params = {
 										...params,
@@ -1521,7 +1544,12 @@
 						<div class="flex mt-0.5 space-x-2">
 							<div class=" flex-1">
 								<input
-									bind:value={params.custom_params[key]}
+									value={params.custom_params ? params.custom_params[key] : ''}
+									on:input={(e) => {
+										if (!params.custom_params) params.custom_params = {};
+										const target = /** @type {HTMLInputElement} */ (e.target);
+										params.custom_params[key] = target.value;
+									}}
 									type="text"
 									class="text-sm w-full bg-transparent outline-hidden outline-none"
 									placeholder={$i18n.t('Custom Parameter Value')}

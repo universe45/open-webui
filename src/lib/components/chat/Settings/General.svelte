@@ -1,17 +1,18 @@
 <script lang="ts">
+	import { models, settings, theme, user } from '$lib/stores';
+	import type { Params } from '$lib/types';
+	
+	import AdvancedParams from './Advanced/AdvancedParams.svelte';
+	import Textarea from '$lib/components/common/Textarea.svelte';
 	import { toast } from 'svelte-sonner';
 	import { createEventDispatcher, onMount, getContext } from 'svelte';
 	import i18n from '$lib/i18n';
 	import { getLanguages, changeLanguage } from '$lib/i18n';
 	const dispatch = createEventDispatcher();
-
-	import { models, settings, theme, user } from '$lib/stores';
-
-	import AdvancedParams from './Advanced/AdvancedParams.svelte';
-	import Textarea from '$lib/components/common/Textarea.svelte';
+	
 	export let saveSettings: Function;
-	export let getModels: Function;
-
+	export const getModels: Function = () => {};
+	
 	// General
 	let themes = ['dark', 'light', 'oled-dark'];
 	let selectedTheme = 'system';
@@ -38,7 +39,7 @@
 		}
 	};
 
-	let params = {
+	let params: Params = {
 		// Advanced
 		stream_response: null,
 		function_calling: null,
@@ -56,7 +57,7 @@
 		top_k: null,
 		top_p: null,
 		min_p: null,
-		stop: null as string | null,
+		stop: null,
 		tfs_z: null,
 		num_ctx: null,
 		num_batch: null,
@@ -65,7 +66,10 @@
 		num_gpu: null,
 		use_mmap: null,
 		use_mlock: null,
-		num_thread: null
+		num_thread: null,
+		think: null,
+		keep_alive: null,
+		format: null
 	};
 
 	const saveHandler = async () => {
@@ -75,13 +79,13 @@
 				stream_response: params.stream_response !== null ? params.stream_response : undefined,
 				function_calling: params.function_calling !== null ? params.function_calling : undefined,
 				seed: (params.seed !== null ? params.seed : undefined) ?? undefined,
-				stop: params.stop ? params.stop.split(',').filter((e) => e.trim()) : undefined,
+				stop: params.stop ? (typeof params.stop === 'string' ? params.stop.split(',').filter((e) => e.trim()) : params.stop) : undefined,
 				temperature: params.temperature !== null ? params.temperature : undefined,
 				reasoning_effort: params.reasoning_effort !== null ? params.reasoning_effort : undefined,
 				logit_bias: params.logit_bias !== null ? params.logit_bias : undefined,
 				frequency_penalty: params.frequency_penalty !== null ? params.frequency_penalty : undefined,
-				presence_penalty: params.frequency_penalty !== null ? params.frequency_penalty : undefined,
-				repeat_penalty: params.frequency_penalty !== null ? params.frequency_penalty : undefined,
+				presence_penalty: params.presence_penalty !== null ? params.presence_penalty : undefined,
+				repeat_penalty: params.repeat_penalty !== null ? params.repeat_penalty : undefined,
 				repeat_last_n: params.repeat_last_n !== null ? params.repeat_last_n : undefined,
 				mirostat: params.mirostat !== null ? params.mirostat : undefined,
 				mirostat_eta: params.mirostat_eta !== null ? params.mirostat_eta : undefined,
@@ -115,7 +119,14 @@
 		system = $settings.system ?? '';
 
 		params = { ...params, ...$settings.params };
-		params.stop = $settings?.params?.stop ? ($settings?.params?.stop ?? []).join(',') : null;
+		params.stop = $settings?.params?.stop 
+			? (Array.isArray($settings?.params?.stop) ? $settings?.params?.stop.join(',') : $settings?.params?.stop) 
+			: null;
+		
+		// Ensure params.custom_params is initialized
+		if (params.custom_params === undefined) {
+			params.custom_params = {};
+		}
 	});
 
 	const applyTheme = (_theme: string) => {
@@ -209,7 +220,7 @@
 						<option value="dark">🌑 {$i18n.t('Dark')}</option>
 						<option value="oled-dark">🌃 {$i18n.t('OLED Dark')}</option>
 						<option value="light">☀️ {$i18n.t('Light')}</option>
-						<option value="her">🌷 Her</option>
+						<option value="custom">◉ {$i18n.t('Custom (BETA)')}</option>
 						<!-- <option value="rose-pine dark">🪻 {$i18n.t('Rosé Pine')}</option>
 						<option value="rose-pine-dawn light">🌷 {$i18n.t('Rosé Pine Dawn')}</option> -->
 					</select>

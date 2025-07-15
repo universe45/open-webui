@@ -58,7 +58,15 @@ export const toolServers = writable([]);
 export const banners: Writable<Banner[]> = writable([]);
 
 export const settings: Writable<Settings> = writable({
-	chatDirection: 'LTR' // Default value for chatDirection
+	chatDirection: 'LTR', // Default value for chatDirection
+	params: {
+		stream_response: true,
+		function_calling: false,
+		seed: 0,
+		temperature: 0.7,
+		// Add other required Params properties with default values
+	} as Params,
+	notifications: {}
 });
 
 export const showSidebar = writable(false);
@@ -99,7 +107,11 @@ type OllamaModelDetails = {
 	quantization_level: string;
 };
 
+import type { Params } from '$lib/types';
+
 type Settings = {
+	params: Params,
+	backgroundImageUrl?: string;
 	copyFormatted?: boolean;
 	directConnections?: undefined;
 	models?: string[];
@@ -118,6 +130,7 @@ type Settings = {
 	ctrlEnterToSend?: boolean;
 
 	system?: string;
+	highContrastMode?: boolean;
 	requestFormat?: string;
 	keepAlive?: string;
 	seed?: number;
@@ -251,6 +264,7 @@ type SessionUser = {
 			temporary: boolean;
 			temporary_enforced: boolean;
 			controls: string;
+			system_prompt: boolean;
 		};
 	};
 	email: string;
