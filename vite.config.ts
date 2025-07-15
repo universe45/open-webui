@@ -30,7 +30,15 @@ export default defineConfig({
 		APP_BUILD_HASH: JSON.stringify(process.env.APP_BUILD_HASH || 'dev-build')
 	},
 	build: {
-		sourcemap: true
+		sourcemap: true,
+		chunkSizeWarningLimit: 1000, // Increase chunk size warning limit
+		rollupOptions: {
+			output: {
+				manualChunks: {
+					pyodide: ['pyodide'],
+				}
+			}
+		}
 	},
 	worker: {
 		format: 'es'
