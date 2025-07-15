@@ -5,21 +5,22 @@ import { setGlobalDispatcher, ProxyAgent } from 'undici';
 
 // Define packages to download - these will be available in the frontend
 const packages = [
-  'micropip',
-  'packaging',
-  'requests',
-  'beautifulsoup4',
-  'numpy',
-  'pandas',
-  'matplotlib',
-  'scikit-learn',
-  'scipy',
-  'regex',
-  'sympy',
-  'tiktoken',
-  'seaborn',
-  'pytz',
-  'black'
+	'micropip',
+	'packaging',
+	'requests',
+	'beautifulsoup4',
+	'numpy',
+	'pandas',
+	'matplotlib',
+	'scikit-learn',
+	'scipy',
+	'regex',
+	'sympy',
+	'tiktoken',
+	'seaborn',
+	'pytz',
+	'black',
+	'openai'
 ];
 
 // Paths for generated files
@@ -151,52 +152,49 @@ async function downloadPackages() {
     await ensureDirectoryExists(staticDir);
   }
 
-  // If we need to update, download everything
-  if (pyodideNeedsUpdate) {
-    try {
-      console.log(`Using Pyodide v${pyodideVersion} from node_modules`);
-      
-      // Step 1: Copy Pyodide from node_modules to static/pyodide
-      await copyPyodide();
-      
-      // Step 2: Create manifest files
-      console.log('Creating package manifest files...');
-      
-      // Create a basic lock file
-      const lockFileContent = {
-        timestamp: new Date().toISOString(),
-        packages: packages.map(pkg => ({ 
-          name: pkg, 
-          version: "unknown"
-        }))
-      };
-      await writeFile(LOCK_FILE_PATH, JSON.stringify(lockFileContent, null, 2));
-      console.log('Created package lock file');
-      
-      // Create a manifest file with default values
-      const manifestContent = {};
-      packages.forEach(pkg => {
-        manifestContent[pkg] = {
-          installed: true,
-          version: "unknown"
-        };
-      });
-      await writeFile(MANIFEST_FILE_PATH, JSON.stringify(manifestContent, null, 2));
-      console.log('Created package manifest file');
-      
-      // Create helper script
-      await createHelperScript();
-      
-      // Create the initialization script
-      await createInitScript();
-      
-      console.log('Pyodide packages prepared for frontend use');
-      console.log('Note: Actual package installation will happen in the browser');
-      console.log('The "Didn\'t find package" messages are normal on first load and will be cached');
-    } catch (err) {
-      console.error('Failed during Pyodide setup:', err);
-    }
-  }
+	const packageJson = JSON.parse(await readFile('package.json'));
+	const pyodideVersion = packageJson.dependencies.pyodide.replace('^', '');
+
+	try {
+		const pyodidePackageJson = JSON.parse(await readFile('static/pyodide/package.json'));
+		const pyodidePackageVersion = pyodidePackageJson.version.replace('^', '');
+
+		if (pyodideVersion !== pyodidePackageVersion) {
+			console.log('Pyodide version mismatch, removing static/pyodide directory');
+			await rmdir('static/pyodide', { recursive: true });
+		}
+	} catch (err) {
+		console.log('Pyodide package not found, proceeding with download.', err);
+	}
+
+	try {
+		console.log('Loading micropip package');
+		await pyodide.loadPackage('micropip');
+
+		const micropip = pyodide.pyimport('micropip');
+		console.log('Downloading Pyodide packages:', packages);
+
+		try {
+			for (const pkg of packages) {
+				console.log(`Installing package: ${pkg}`);
+				await micropip.install(pkg);
+			}
+		} catch (err) {
+			console.error('Package installation failed:', err);
+			return;
+		}
+
+		console.log('Pyodide packages downloaded, freezing into lock file');
+
+		try {
+			const lockFile = await micropip.freeze();
+			await writeFile('static/pyodide/pyodide-lock.json', lockFile);
+		} catch (err) {
+			console.error('Failed to write lock file:', err);
+		}
+	} catch (err) {
+		console.error('Failed to load or install micropip:', err);
+	}
 }
 
 /**

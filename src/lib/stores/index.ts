@@ -46,6 +46,8 @@ export const chats = writable(null);
 export const pinnedChats = writable([]);
 export const tags = writable([]);
 
+export const selectedFolder = writable(null);
+
 export const models: Writable<Model[]> = writable([]);
 
 export const prompts: Writable<null | Prompt[]> = writable(null);
@@ -98,137 +100,7 @@ type BaseModel = {
 	owned_by: 'ollama' | 'openai' | 'arena';
 };
 
-type OllamaModelDetails = {
-	parent_model: string;
-	format: string;
-	family: string;
-	families: string[] | null;
-	parameter_size: string;
-	quantization_level: string;
-};
-
 import type { Params } from '$lib/types';
-
-type Settings = {
-	params: Params,
-	backgroundImageUrl?: string;
-	copyFormatted?: boolean;
-	directConnections?: undefined;
-	models?: string[];
-	conversationMode?: boolean;
-	speechAutoSend?: boolean;
-	responseAutoPlayback?: boolean;
-	audio?: AudioSettings;
-	showUsername?: boolean;
-	notificationEnabled?: boolean;
-	notifications: {
-		webhook_url?: string;
-	};
-	title?: TitleSettings;
-	splitLargeDeltas?: boolean;
-	chatDirection: 'LTR' | 'RTL' | 'auto';
-	ctrlEnterToSend?: boolean;
-
-	system?: string;
-	highContrastMode?: boolean;
-	requestFormat?: string;
-	keepAlive?: string;
-	seed?: number;
-	temperature?: string;
-	repeat_penalty?: string;
-	top_k?: string;
-	top_p?: string;
-	num_ctx?: string;
-	num_batch?: string;
-	num_keep?: string;
-	options?: ModelOptions;
-};
-
-type ModelOptions = {
-	stop?: boolean;
-};
-
-type AudioSettings = {
-	STTEngine?: string;
-	TTSEngine?: string;
-	tts?: {
-		defaultVoice: string;
-		engine: string;
-		engineConfig?: {
-			dtype: string;
-		};
-		voice: string;
-		playbackRate: number;
-	}
-	speaker?: string;
-	model?: string;
-	nonLocalVoices?: boolean;
-};
-
-type TitleSettings = {
-	auto?: boolean;
-	model?: string;
-	modelExternal?: string;
-	prompt?: string;
-};
-
-type Prompt = {
-	command: string;
-	user_id: string;
-	title: string;
-	content: string;
-	timestamp: number;
-};
-
-type Document = {
-	collection_name: string;
-	filename: string;
-	name: string;
-	title: string;
-};
-
-type Config = {
-	audio: {
-		tts: {
-			engine: string;
-			voice: string;
-			split_on: string;
-		}
-	};
-	status: boolean;
-	name: string;
-	version: string;
-	default_locale: string;
-	default_models: string;
-	default_prompt_suggestions: PromptSuggestion[];
-	features: {
-		auth: boolean;
-		auth_trusted_header: boolean;
-		enable_api_key: boolean;
-		enable_channels: boolean;
-		enable_direct_connections: boolean;
-		enable_signup: boolean;
-		enable_login_form: boolean;
-		enable_web_search?: boolean;
-		enable_google_drive_integration: boolean;
-		enable_onedrive_integration: boolean;
-		enable_image_generation: boolean;
-		enable_admin_export: boolean;
-		enable_admin_chat_access: boolean;
-		enable_community_sharing: boolean;
-		enable_autocomplete_generation: boolean;
-		enable_user_webhooks: boolean;
-	};
-	oauth: {
-		providers: {
-			[key: string]: string;
-		};
-	};
-	ui?: {
-		pending_user_overlay_title?: string;
-		pending_user_overlay_description?: string;
-	};
-};
 
 export interface AdminConfig {
 	DEFAULT_USER_ROLE: string;
@@ -245,33 +117,6 @@ export interface AdminConfig {
 	WEBUI_URL: string;
 }
 
-type PromptSuggestion = {
-	content: string;
-	title: [string, string];
-};
-
-type SessionUser = {
-	id: string;
-	token: string;
-	permissions: {
-		workspace: {
-			models: string[];
-			knowledge: string[];
-			prompts: string[];
-			tools: string[];
-		};
-		chat: {
-			temporary: boolean;
-			temporary_enforced: boolean;
-			controls: string;
-			system_prompt: boolean;
-		};
-	};
-	email: string;
-	name: string;
-	role: string;
-	profile_image_url: string;
-};
 
 export interface OpenAIModel extends BaseModel {
 	owned_by: 'openai';
@@ -305,7 +150,159 @@ export interface OllamaModel extends BaseModel {
 	};
 }
 
-// Backend
-export const WEBUI_NAME = writable(APP_NAME);
-export const config: Writable<Config | undefined> = writable(undefined);
-export const user: Writable<SessionUser | undefined> = writable(undefined);
+type OllamaModelDetails = {
+	parent_model: string;
+	format: string;
+	family: string;
+	families: string[] | null;
+	parameter_size: string;
+	quantization_level: string;
+};
+
+type Settings = {
+	pinnedModels?: never[];
+	toolServers?: never[];
+	detectArtifacts?: boolean;
+	showUpdateToast?: boolean;
+	showChangelog?: boolean;
+	showEmojiInCall?: boolean;
+	voiceInterruption?: boolean;
+	collapseCodeBlocks?: boolean;
+	expandDetails?: boolean;
+	notificationSound?: boolean;
+	notificationSoundAlways?: boolean;
+	stylizedPdfExport?: boolean;
+	notifications?: any;
+	imageCompression?: boolean;
+	imageCompressionSize?: any;
+	widescreenMode?: null;
+	largeTextAsFile?: boolean;
+	promptAutocomplete?: boolean;
+	hapticFeedback?: boolean;
+	responseAutoCopy?: any;
+	richTextInput?: boolean;
+	params?: any;
+	userLocation?: any;
+	webSearch?: boolean;
+	memory?: boolean;
+	autoTags?: boolean;
+	autoFollowUps?: boolean;
+	splitLargeChunks?(body: any, splitLargeChunks: any): unknown;
+	backgroundImageUrl?: null;
+	landingPageMode?: string;
+	iframeSandboxAllowForms?: boolean;
+	iframeSandboxAllowSameOrigin?: boolean;
+	scrollOnBranchChange?: boolean;
+	directConnections?: null;
+	chatBubble?: boolean;
+	copyFormatted?: boolean;
+	models?: string[];
+	conversationMode?: boolean;
+	speechAutoSend?: boolean;
+	responseAutoPlayback?: boolean;
+	audio?: AudioSettings;
+	showUsername?: boolean;
+	notificationEnabled?: boolean;
+	highContrastMode?: boolean;
+	title?: TitleSettings;
+	splitLargeDeltas?: boolean;
+	chatDirection?: 'LTR' | 'RTL' | 'auto';
+	ctrlEnterToSend?: boolean;
+
+	system?: string;
+	seed?: number;
+	temperature?: string;
+	repeat_penalty?: string;
+	top_k?: string;
+	top_p?: string;
+	num_ctx?: string;
+	num_batch?: string;
+	num_keep?: string;
+	options?: ModelOptions;
+};
+
+type ModelOptions = {
+	stop?: boolean;
+};
+
+type AudioSettings = {
+	stt: any;
+	tts: any;
+	STTEngine?: string;
+	TTSEngine?: string;
+	speaker?: string;
+	model?: string;
+	nonLocalVoices?: boolean;
+};
+
+type TitleSettings = {
+	auto?: boolean;
+	model?: string;
+	modelExternal?: string;
+	prompt?: string;
+};
+
+type Prompt = {
+	command: string;
+	user_id: string;
+	title: string;
+	content: string;
+	timestamp: number;
+};
+
+type Document = {
+	collection_name: string;
+	filename: string;
+	name: string;
+	title: string;
+};
+
+type Config = {
+	license_metadata: any;
+	status: boolean;
+	name: string;
+	version: string;
+	default_locale: string;
+	default_models: string;
+	default_prompt_suggestions: PromptSuggestion[];
+	features: {
+		auth: boolean;
+		auth_trusted_header: boolean;
+		enable_api_key: boolean;
+		enable_signup: boolean;
+		enable_login_form: boolean;
+		enable_web_search?: boolean;
+		enable_google_drive_integration: boolean;
+		enable_onedrive_integration: boolean;
+		enable_image_generation: boolean;
+		enable_admin_export: boolean;
+		enable_admin_chat_access: boolean;
+		enable_community_sharing: boolean;
+		enable_autocomplete_generation: boolean;
+		enable_direct_connections: boolean;
+		enable_version_update_check: boolean;
+	};
+	oauth: {
+		providers: {
+			[key: string]: string;
+		};
+	};
+	ui?: {
+		pending_user_overlay_title?: string;
+		pending_user_overlay_description?: string;
+	};
+};
+
+type PromptSuggestion = {
+	content: string;
+	title: [string, string];
+};
+
+type SessionUser = {
+	permissions: any;
+	id: string;
+	email: string;
+	name: string;
+	role: string;
+	profile_image_url: string;
+};
