@@ -223,22 +223,35 @@ def get_function_module_from_cache(request, function_id, load_from_db=True):
 
 
 def install_frontmatter_requirements(requirements: str):
-    if requirements:
+    if not requirements:
+        log.info("No requirements found in frontmatter.")
+        return
+        
+    try:
+        req_list = [req.strip() for req in requirements.split(",") if req.strip()]
+        if not req_list:
+            log.info("No valid requirements found after parsing.")
+            return
+            
+        log.info(f"Installing requirements: {' '.join(req_list)}")
+        
+        # Use a timeout to prevent hanging on package installation
         try:
-            req_list = [req.strip() for req in requirements.split(",")]
-            log.info(f"Installing requirements: {' '.join(req_list)}")
             subprocess.check_call(
                 [sys.executable, "-m", "pip", "install"]
                 + PIP_OPTIONS
                 + req_list
-                + PIP_PACKAGE_INDEX_OPTIONS
+                + PIP_PACKAGE_INDEX_OPTIONS,
+                timeout=300  # 5 minute timeout
             )
-        except Exception as e:
-            log.error(f"Error installing packages: {' '.join(req_list)}")
-            raise e
-
-    else:
-        log.info("No requirements found in frontmatter.")
+        except subprocess.TimeoutExpired:
+            log.error(f"Package installation timed out after 5 minutes: {' '.join(req_list)}")
+            raise Exception("Package installation timed out")
+            
+    except Exception as e:
+        log.error(f"Error installing packages: {' '.join(req_list)} - {str(e)}")
+        # Don't raise the exception - just log it to prevent startup failures
+        # This way, the app will still work even if a package fails to install
 
 
 def install_tool_and_function_dependencies():
@@ -253,18 +266,45 @@ def install_tool_and_function_dependencies():
     tool_list = Tools.get_tools()
 
     all_dependencies = ""
+    errors = []
+    
     try:
+        # Process functions first
         for function in function_list:
-            frontmatter = extract_frontmatter(replace_imports(function.content))
-            if dependencies := frontmatter.get("requirements"):
-                all_dependencies += f"{dependencies}, "
-        for tool in tool_list:
-            # Only install requirements for admin tools
-            if tool.user.role == "admin":
-                frontmatter = extract_frontmatter(replace_imports(tool.content))
+            try:
+                frontmatter = extract_frontmatter(replace_imports(function.content))
                 if dependencies := frontmatter.get("requirements"):
                     all_dependencies += f"{dependencies}, "
-
-        install_frontmatter_requirements(all_dependencies.strip(", "))
+            except Exception as e:
+                log.warning(f"Error processing function {function.id}: {e}")
+                errors.append(f"Function {function.id}: {str(e)}")
+                
+        # Then process tools
+        for tool in tool_list:
+            try:
+                # Only install requirements for admin tools
+                if tool.user and tool.user.role == "admin":
+                    frontmatter = extract_frontmatter(replace_imports(tool.content))
+                    if dependencies := frontmatter.get("requirements"):
+                        all_dependencies += f"{dependencies}, "
+            except Exception as e:
+                log.warning(f"Error processing tool {tool.id}: {e}")
+                errors.append(f"Tool {tool.id}: {str(e)}")
+        
+        # Clean up dependencies string
+        cleaned_deps = all_dependencies.strip(", ")
+        if cleaned_deps:
+            try:
+                log.info(f"Installing all collected dependencies: {cleaned_deps}")
+                install_frontmatter_requirements(cleaned_deps)
+            except Exception as e:
+                log.error(f"Error during bulk package installation: {e}")
+                # Continue with application startup regardless
+        else:
+            log.info("No dependencies found to install")
+            
     except Exception as e:
         log.error(f"Error installing requirements: {e}")
+        
+    if errors:
+        log.warning(f"Encountered {len(errors)} errors during dependency collection: {', '.join(errors)}")

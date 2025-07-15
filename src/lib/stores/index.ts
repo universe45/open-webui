@@ -7,6 +7,9 @@ import { KokoroWorker } from '$lib/workers/KokoroWorker';
 
 import emojiShortCodes from '$lib/emoji-shortcodes.json';
 
+// Export app name as a writable store
+export const WEBUI_NAME = writable(APP_NAME);
+
 // Frontend
 export const MODEL_DOWNLOAD_POOL = writable({});
 
@@ -58,6 +61,39 @@ export const functions = writable(null);
 export const toolServers = writable([]);
 
 export const banners: Writable<Banner[]> = writable([]);
+
+// Add missing stores
+export const config: Writable<Config> = writable({
+	license_metadata: {},
+	status: true,
+	name: APP_NAME,
+	version: '0.6.16',
+	default_locale: 'en-US',
+	default_models: '',
+	default_prompt_suggestions: [],
+	features: {
+		auth: true,
+		auth_trusted_header: false,
+		enable_api_key: true,
+		enable_signup: true,
+		enable_login_form: true,
+		enable_web_search: false,
+		enable_google_drive_integration: false,
+		enable_onedrive_integration: false,
+		enable_image_generation: true,
+		enable_admin_export: true,
+		enable_admin_chat_access: true,
+		enable_community_sharing: true,
+		enable_autocomplete_generation: true,
+		enable_direct_connections: true,
+		enable_version_update_check: true
+	},
+	oauth: {
+		providers: {}
+	}
+});
+
+export const user: Writable<SessionUser | null> = writable(null);
 
 export const settings: Writable<Settings> = writable({
 	chatDirection: 'LTR', // Default value for chatDirection
